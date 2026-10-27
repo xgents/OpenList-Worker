@@ -7,7 +7,7 @@
 //
 // 为什么声明 KV 且【省略 id 字段】（不能写 "id": ""）：
 //   wrangler 会自动预配（automatic provisioning）：首次部署创建
-//   "项目名-绑定名" 的命名空间（此处即 openlist-tsworkers-kv）并绑定；
+//   "项目名-绑定名" 的命名空间（此处即 openlist-worker-kv）并绑定；
 //   二次部署通过服务端 inherit 复用已有绑定，不会重复创建。
 //
 // 注意：CI / 一键部署属非交互环境，wrangler 不会把生成的 id 回写进本文件。
@@ -15,7 +15,7 @@
 //
 // ⚠️ 不要用 `wrangler kv namespace create` 手动建名为 "KV" 的命名空间：
 //   wrangler 的预配链路无法按 title 复用已有命名空间（KVHandler 未实现
-//   isConnectedToExistingResource），它会另建 openlist-tsworkers-kv，
+//   isConnectedToExistingResource），它会另建 openlist-worker-kv，
 //   手动建的那个不会被任何绑定使用，成为孤儿资源。参见 Issue #34。
 //
 // Secret（JWT_SECRET / ADMIN_PASS / ALLOW_URLS / MYSQL_URLS / EO_KV_URLS / CF_* 等）请在
@@ -23,7 +23,7 @@
 // 用户填入的值会成为该 Worker 的 Secret，后续更新不会被覆盖。
 // =============================================================================
 {
-  "name": "openlist-tsworkers",
+  "name": "openlist-worker",
   "main": "src/backend/worker.ts",
   "compatibility_date": "2026-08-04",
   "compatibility_flags": ["nodejs_compat"],
@@ -211,11 +211,11 @@
   // ▶ 方案 A：KV（默认启用，免费额度大、最通用）
   //   ⚠️ 必须【完全省略 id 字段】，不能写成 "id": ""：
   //      wrangler 配置校验会拒绝空字符串 id（"should have a string id field"）。
-  //   省略 id 后：首次部署由 wrangler 自动创建 openlist-tsworkers-kv 并绑定；
+  //   省略 id 后：首次部署由 wrangler 自动创建 openlist-worker-kv 并绑定；
   //   二次部署通过 inherit 复用已有绑定，不会重复创建。
   //   若想改用账户里已有的 KV，把该命名空间的 id 填进来即可。
   //
-  //  "kv_namespaces": [{ "binding": "KV" }],
+  "kv_namespaces": [{ "binding": "KV" }],
   //
   // ▶ 方案 B：D1（关系型，可与 Go 后端共享库；DB_FORMAT 建议改为 "sql"）
   //   控制台：Workers & Pages → D1 → 创建数据库 → 绑定到 Worker，变量名填 DB
